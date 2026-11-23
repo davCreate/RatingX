@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, ArrowUpDown } from 'lucide-react';
+import { Plus, Trash2, Edit2, ArrowUpDown, Search as SearchIcon, Heart, Folder } from 'lucide-react';
 import { useAppStore } from '../store';
-import { LibraryItem, MediaType } from '../types';
+import { LibraryItem, MediaType, WatchStatus } from '../types';
 import { PosterCard } from '../components/PosterCard';
 import { TitleDetailModal } from '../components/TitleDetailModal';
 import { useToast } from '../components/Toast';
@@ -11,32 +11,55 @@ import { useToast } from '../components/Toast';
 export const Library: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeSectionId = searchParams.get('section');
+  const filterParam = searchParams.get('filter');
 
-  const { sections, library, addSection, updateSection, deleteSection } = useAppStore();
+  const { sections, library, addSection, updateSection, deleteSection, toggleFavorite } = useAppStore();
   const { showToast } = useToast();
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeItem, setActiveItem] = useState<LibraryItem | null>(null);
   const [isEditingSection, setIsEditingSection] = useState(false);
   const [sectionModalMode, setSectionModalMode] = useState<'create' | 'edit'>('create');
   const [secName, setSecName] = useState('');
   const [secIcon, setSecIcon] = useState('📁');
+  const [secColor, setSecColor] = useState('#8B5CF6');
   const [targetEditSecId, setTargetEditSecId] = useState<string | null>(null);
 
   // Sorting and Filtering
   const [sortBy, setSortBy] = useState<'rating_desc' | 'rating_asc' | 'date_desc' | 'title_asc'>('rating_desc');
   const [typeFilter, setTypeFilter] = useState<'all' | MediaType>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | WatchStatus>('all');
 
   const filteredItems = useMemo(() => {
     let items = [...library];
 
-    // Filter by Section
-    if (activeSectionId) {
+    // Favorites only
+    if (filterParam === 'favorites') {
+      items = items.filter((i) => i.favorite);
+    } else if (activeSectionId) {
       items = items.filter((i) => i.sectionId === activeSectionId);
     }
 
-    // Filter by Media Type
+    // Media Type Filter
     if (typeFilter !== 'all') {
       items = items.filter((i) => i.mediaType === typeFilter);
+    }
+
+    // Watch Status Filter
+    if (statusFilter !== 'all') {
+      items = items.filter((i) => i.watchStatus === statusFilter);
+    }
+
+    // Local Search Query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      items = items.filter(
+        (i) =>
+          i.title.toLowerCase().includes(q) ||
+          i.overview.toLowerCase().includes(q) ||
+          i.note.toLowerCase().includes(q) ||
+          i.tags?.some((t) => t.toLowerCase().includes(q))
+      );
     }
 
     // Sort
@@ -57,21 +80,23 @@ export const Library: React.FC = () => {
     });
 
     return items;
-  }, [library, activeSectionId, typeFilter, sortBy]);
+  }, [library, activeSectionId, filterParam, typeFilter, statusFilter, searchQuery, sortBy]);
 
   const activeSection = sections.find((s) => s.id === activeSectionId);
 
   const handleOpenCreateSection = () => {
     setSecName('');
     setSecIcon('📁');
+    setSecColor('#8B5CF6');
     setSectionModalMode('create');
     setIsEditingSection(true);
   };
 
-  const handleOpenEditSection = (id: string, name: string, icon: string) => {
+  const handleOpenEditSection = (id: string, name: string, icon: string, color?: string) => {
     setTargetEditSecId(id);
     setSecName(name);
     setSecIcon(icon);
+    setSecColor(color || '#8B5CF6');
     setSectionModalMode('edit');
     setIsEditingSection(true);
   };
@@ -81,12 +106,12 @@ export const Library: React.FC = () => {
     if (!secName.trim()) return;
 
     if (sectionModalMode === 'create') {
-      const created = addSection(secName.trim(), secIcon);
+      const created = addSection(secName.trim(), secIcon, secColor);
       setSearchParams({ section: created.id });
-      showToast(`Created section "${created.name}"`);
+      showToast(`Created folder "${created.name}"`);
     } else if (targetEditSecId) {
-      updateSection(targetEditSecId, secName.trim(), secIcon);
-      showToast('Section updated');
+      updateSection(targetEditSecId, secName.trim(), secIcon, secColor);
+      showToast('Folder updated');
     }
 
     setIsEditingSection(false);
@@ -94,14 +119,15 @@ export const Library: React.FC = () => {
 
   const handleDeleteCurrentSection = (id: string) => {
     const sec = sections.find((s) => s.id === id);
-    if (window.confirm(`Delete section "${sec?.name}"? Items inside will remain in your library.`)) {
+    if (window.confirm(`Delete folder "${sec?.name}"? Titles inside will remain in your library.`)) {
       deleteSection(id);
       setSearchParams({});
-      showToast('Section deleted');
+      showToast('Folder deleted');
     }
   };
 
   const EMOJI_OPTIONS = ['📁', '🔥', '⭐', '🎬', '🍿', '📺', '🌸', '🏆', '💎', '🎯', '🚀', '🔮'];
+  const COLOR_OPTIONS = ['#8B5CF6', '#EC4899', '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1'];
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -109,22 +135,28 @@ export const Library: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <span>{activeSection ? `${activeSection.icon} ${activeSection.name}` : '📚 All Library Titles'}</span>
-            <span className="text-sm font-semibold text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-white/5">
+            <span>
+              {filterParam === 'favorites'
+                ? '❤️ Favorite Titles'
+                : activeSection
+                ? `${activeSection.icon} ${activeSection.name}`
+                : '📚 Complete Library'}
+            </span>
+            <span className="text-sm font-semibold text-zinc-500 bg-zinc-900 px-3 py-1 rounded-full border border-white/5 font-mono">
               {filteredItems.length}
             </span>
           </h1>
           <p className="text-sm text-zinc-400 mt-1">
-            Organize films, series and anime into custom folders and rate each from 0/10.
+            Organize films, series, and anime into custom folders and rate each from 0/10.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {activeSection && (
+          {activeSection && filterParam !== 'favorites' && (
             <>
               <button
                 type="button"
-                onClick={() => handleOpenEditSection(activeSection.id, activeSection.name, activeSection.icon)}
+                onClick={() => handleOpenEditSection(activeSection.id, activeSection.name, activeSection.icon, activeSection.color)}
                 className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold border border-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <Edit2 className="w-3.5 h-3.5" />
@@ -158,13 +190,26 @@ export const Library: React.FC = () => {
           type="button"
           onClick={() => setSearchParams({})}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-            !activeSectionId
+            !activeSectionId && filterParam !== 'favorites'
               ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
           }`}
         >
-          <span>📁</span>
+          <Folder className="w-3.5 h-3.5" />
           <span>All Items ({library.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSearchParams({ filter: 'favorites' })}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+            filterParam === 'favorites'
+              ? 'bg-red-600 text-white shadow-md shadow-red-600/30'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+          }`}
+        >
+          <Heart className="w-3.5 h-3.5 fill-red-400 text-red-400" />
+          <span>Favorites ({library.filter((i) => i.favorite).length})</span>
         </button>
 
         {sections.map((sec) => {
@@ -191,6 +236,18 @@ export const Library: React.FC = () => {
 
       {/* Filter and Sort Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-900/50 p-3 rounded-2xl border border-white/5">
+        {/* Local Search inside Library */}
+        <div className="relative min-w-[220px]">
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <input
+            type="text"
+            placeholder="Search this folder or tag..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-zinc-950 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+          />
+        </div>
+
         {/* Type Filter */}
         <div className="flex items-center gap-1">
           {(['all', 'movie', 'tv', 'anime'] as const).map((t) => (
@@ -204,10 +261,24 @@ export const Library: React.FC = () => {
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              {t === 'tv' ? 'TV Series' : t}
+              {t === 'tv' ? 'TV' : t}
             </button>
           ))}
         </div>
+
+        {/* Watch Status Filter */}
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+          className="px-3 py-1.5 rounded-lg bg-zinc-950 border border-white/10 text-xs text-zinc-300 focus:outline-none focus:border-purple-500 cursor-pointer"
+        >
+          <option value="all">All Watch Status</option>
+          <option value="completed">Completed</option>
+          <option value="watching">Watching</option>
+          <option value="plan_to_watch">Plan to Watch</option>
+          <option value="on_hold">On Hold</option>
+          <option value="dropped">Dropped</option>
+        </select>
 
         {/* Sort Dropdown */}
         <div className="flex items-center gap-2">
@@ -229,9 +300,9 @@ export const Library: React.FC = () => {
       {filteredItems.length === 0 ? (
         <div className="py-24 text-center space-y-3 bg-zinc-900/20 rounded-3xl border border-white/5">
           <span className="text-5xl">🎬</span>
-          <h3 className="text-lg font-bold text-white">No titles in this folder</h3>
+          <h3 className="text-lg font-bold text-white">No titles match your filter</h3>
           <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-            Use Search to find movies, shows or anime and add them here.
+            Try adjusting your search terms or folder selections.
           </p>
         </div>
       ) : (
@@ -241,6 +312,7 @@ export const Library: React.FC = () => {
               key={item.id}
               item={item}
               onClick={() => setActiveItem(item)}
+              onToggleFavorite={() => toggleFavorite(item.id)}
               sectionName={sections.find((s) => s.id === item.sectionId)?.name}
               isLibrary
             />
@@ -306,6 +378,25 @@ export const Library: React.FC = () => {
                       >
                         {emoji}
                       </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-400 block mb-1">
+                    Folder Color Accent
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {COLOR_OPTIONS.map((col) => (
+                      <button
+                        key={col}
+                        type="button"
+                        onClick={() => setSecColor(col)}
+                        className={`w-6 h-6 rounded-full transition-transform cursor-pointer ${
+                          secColor === col ? 'scale-125 ring-2 ring-white' : 'opacity-70 hover:opacity-100'
+                        }`}
+                        style={{ backgroundColor: col }}
+                      />
                     ))}
                   </div>
                 </div>

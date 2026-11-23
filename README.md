@@ -1,117 +1,157 @@
 <div align="center">
 
-# 🎬 RatingX
+<img src="./.github/assets/banner.svg" alt="RatingX Banner" width="100%" />
 
-**The modern desktop catalog to search, organize, and rate films, series, and anime on a 0/10 scale.**
+<br/><br/>
 
 [![GitHub Release](https://img.shields.io/github/v/release/davCreate/RatingX?color=7C3AED&style=for-the-badge&logo=github)](https://github.com/davCreate/RatingX/releases/latest)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20x64-blue?style=for-the-badge&logo=windows)](https://github.com/davCreate/RatingX/releases/latest)
-[![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20x64-3B82F6?style=for-the-badge&logo=windows)](https://github.com/davCreate/RatingX/releases/latest)
+[![Electron](https://img.shields.io/badge/Electron-33-47848F?style=for-the-badge&logo=electron)](https://www.electronjs.org/)
+[![License](https://img.shields.io/badge/License-MIT-10B981?style=for-the-badge)](LICENSE)
 
 <br/>
 
-[📥 **Download Windows Installer (.exe)**](https://github.com/davCreate/RatingX/releases/download/v1.0.0/RatingX.Setup.1.0.0.exe) &nbsp;&bull;&nbsp; [⚡ **Download Portable (.exe)**](https://github.com/davCreate/RatingX/releases/download/v1.0.0/RatingX-Portable-1.0.0.exe) &nbsp;&bull;&nbsp; [📦 **All Releases**](https://github.com/davCreate/RatingX/releases)
+**Discover, curate, and rate films, TV series, and anime with precision on a 0.0 to 10.0 scale.**<br/>
+*Built with React 18, TypeScript, Tailwind CSS, Framer Motion, and packaged natively for Windows.*
 
 <br/>
 
-![RatingX Preview](https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80)
+[📥 **Download Windows Installer (.exe)**](https://github.com/davCreate/RatingX/releases/download/v1.0.0/RatingX.Setup.1.0.0.exe) &nbsp;&bull;&nbsp; [⚡ **Download Portable Standalone (.exe)**](https://github.com/davCreate/RatingX/releases/download/v1.0.0/RatingX-Portable-1.0.0.exe) &nbsp;&bull;&nbsp; [📦 **All Releases**](https://github.com/davCreate/RatingX/releases)
 
 </div>
 
 ---
 
-## 🌟 Highlights
+## 📸 Overview
 
-RatingX gives cinema lovers, binge watchers, and anime fans a sleek, distraction-free desktop application to curate their entertainment life.
+RatingX gives entertainment lovers a distraction-free, local-first catalog. Track seasonal anime, Hollywood blockbusters, and indie series in one unified dashboard without paywalls or forced accounts.
 
-- 🔍 **Universal Search**: Instantly discover movies, TV series, and anime with poster art, release years, synopsis, and genres. Powered by TMDB & Jikan APIs with offline curated fallbacks.
-- 📁 **Custom Folders & Sections**: Organize titles however you like with personalized names and custom emoji icons (*e.g.*, 🍿 *Currently Bingeing*, 🔥 *All-Time 10/10s*, 🌸 *Anime Masterpieces*, ⏳ *Backlog*).
-- ⭐ **0 to 10 Ratings**: Granular rating system supporting whole numbers and fine-tuned decimals (*e.g.*, `9.4/10`) with personal reviews and timestamps.
-- 👤 **Customizable Public Profile**: Personalize your username, avatar, bio, and banner.
-- 🌐 **Export Shareable HTML**: Generate a standalone, styled HTML webpage of your rated catalog with 1 click to send to friends.
-- 🔄 **Built-in Update Checker**: One-click update check that queries GitHub releases directly from Settings.
-- 💾 **Local-First & Data Ownership**: Zero login required. Full JSON export and restore capabilities.
-- 🎨 **Fluid Dark Glassmorphism UI**: High refresh-rate Framer Motion page animations, responsive grids, and glowing badges.
-
----
-
-## 📥 Downloads for Windows
-
-| Package | Format | Description | Link |
-|---|---|---|---|
-| **Setup Installer** | `.exe` | Standard Windows installation with Start Menu & Desktop shortcuts | [Download (.exe)](https://github.com/davCreate/RatingX/releases/download/v1.0.0/RatingX.Setup.1.0.0.exe) |
-| **Portable Version** | `.exe` | No installation needed. Double-click and run directly | [Download (.exe)](https://github.com/davCreate/RatingX/releases/download/v1.0.0/RatingX-Portable-1.0.0.exe) |
-
-*Tested on Windows 10 & Windows 11 (x64).*
+```
++---------------------------------------------------------------------------------------+
+|  RatingX                                                                              |
+|  +----------------+  +-------------------------------------------------------------+  |
+|  | [Home]         |  |  ★ 10 / 10 Masterpiece Rating Scale                         |  |
+|  | [Explore]      |  |                                                             |  |
+|  | [All Titles]   |  |  [ Trending Movies ] [ Popular Shows ] [ Top Anime ]        |  |
+|  | [Favorites]    |  |                                                             |  |
+|  | [Profile]      |  |  +---------+   +---------+   +---------+   +---------+      |  |
+|  |                |  |  | Poster  |   | Poster  |   | Poster  |   | Poster  |      |  |
+|  | FOLDERS:       |  |  | 9.8★    |   | 10.0★   |   | 9.2★    |   | 8.9★    |      |  |
+|  | ▶ Watching     |  |  +---------+   +---------+   +---------+   +---------+      |  |
+|  | ⭐ Completed    |  |                                                             |  |
+|  | 🔖 Plan to Watch|  |  Rating Distribution:  10★ [████████]  9★ [██████]  ...      |  |
+|  | 🔥 Masterpieces|  +-------------------------------------------------------------+  |
++---------------------------------------------------------------------------------------+
+```
 
 ---
 
-## 🖥️ App Walkthrough
+## ⚡ Key Highlights
 
-### 1. Search & Discover
-Type any film, anime, or series title in the search bar. Filter by Movies, TV Shows, or Anime tabs.
+### 🔍 Multi-Engine Search & Discovery
+- **Live Trending Lists**: High-speed discovery queries for current top anime and trending movies/shows.
+- **Unified Catalog**: Simultaneous lookup across TMDB (cinema & series) and Jikan (MyAnimeList anime engine).
+- **Genre & Year Filters**: Refine search by Sci-Fi, Dark Fantasy, Action, Mystery, Thriller, Romance, or Shonen.
+- **Search Memory**: Instant access to your recent search queries.
 
-### 2. Add to Custom Folders
-Click **+ Add to List** to file the title into an existing folder or create a new section on the spot.
+### 📁 Custom Sections & Folders
+- Create unlimited custom folders (*e.g.*, 🍿 *Binge Watch*, 🔥 *All-Time 10s*, 🌸 *Masterpiece Anime*, ⏳ *Backlog*).
+- Personalize each section with custom emoji icons and distinct color accents.
+- Move titles between folders instantly.
 
-### 3. Rate & Review
-Slide or tap from `0.0` to `10.0`. Jot down your thoughts, favorite quotes, or memorable moments.
+### ⭐ 0.0 to 10.0 Precision Rating
+- **Dual Controls**: Tap star ratings or fine-tune with the decimal slider (*e.g.*, `9.4/10`, `8.7/10`).
+- **Speed Presets**: 1-click presets for *10 Masterpiece*, *9.0 Great*, *8.0 Good*, *6.5 Decent*, and *4.0 Weak*.
+- **Review Notes**: Keep personal reviews, favorite quotes, and memorable timestamps per title.
+- **Custom Tags**: Add hashtags like `#Rewatch`, `#HansZimmer`, `#PlotTwist` to categorize.
 
-### 4. Share Your Profile
-Head to **Public Profile** and click **Share / Export HTML** to produce a self-contained portfolio website of your catalog.
+### 🎥 In-App Official Trailers
+- Watch full HD official trailers directly inside the app with YouTube integration or launch in browser with one click.
+
+### 👤 Public Watch Profile & HTML Export
+- Customizable public identity: Avatar, banner, bio, and favorite quote.
+- **Interactive Distribution Graph**: Visual bar chart of your score distribution across all titles.
+- **Standalone HTML Export**: Generate a self-contained, responsive portfolio webpage of your rated catalog with 1 click to share anywhere.
+
+### 🔄 Auto-Update Checker
+- Built-in updater that queries the GitHub releases API on `davCreate/RatingX` to notify of new builds.
+
+### 🎨 Color Themes
+- **Obsidian Dark**: Elegant dark violet & slate palette.
+- **OLED Pure Black**: High-contrast true black (`#000000`).
+- **Cyberpunk Neon**: Electric purple and hot-pink aesthetic.
 
 ---
 
-## 💻 Building from Source
+## 📥 Download Executables (Windows)
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- npm
+| Build | File Name | Size | Install Required | Link |
+|---|---|---|---|---|
+| **Installer** | `RatingX Setup 1.0.0.exe` | ~128 MB | Yes (Desktop + Start Menu shortcuts) | [Download](https://github.com/davCreate/RatingX/releases/download/v1.0.0/RatingX.Setup.1.0.0.exe) |
+| **Portable** | `RatingX-Portable-1.0.0.exe` | ~128 MB | No (Standalone run anywhere) | [Download](https://github.com/davCreate/RatingX/releases/download/v1.0.0/RatingX-Portable-1.0.0.exe) |
 
-### Setup
+*System Requirements: Windows 10 or Windows 11 (64-bit).*
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `/` | Instantly jump and focus Search bar |
+| `Esc` | Close any active modal, trailer, or dialog |
+| `F12` | Toggle Developer Tools console |
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+```
+RatingX/
+├── electron/
+│   └── main.cjs           # Electron main process (window, shortcuts, external links)
+├── src/
+│   ├── components/        # PosterCard, RatingWidget, RatingChart, TrailerModal, Sidebar
+│   ├── pages/             # Home, Search, Library, Profile, Settings
+│   ├── services/          # TMDB & Jikan API multi-search and trending engine
+│   ├── store/             # Zustand persistent state (library, profile, folders, theme)
+│   └── types/             # TypeScript data contracts
+└── release/               # Compiled Windows .exe binaries
+```
+
+- **Runtime**: [Electron 33](https://www.electronjs.org/)
+- **Frontend**: [React 18](https://react.dev/) + [TypeScript 5](https://www.typescriptlang.org/)
+- **Bundler**: [Vite 5](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS 3](https://tailwindcss.com/)
+- **Motion**: [Framer Motion 11](https://www.framer.com/motion/)
+- **Packaging**: [electron-builder 26](https://www.electron.build/)
+
+---
+
+## 💻 Developer Guide
 
 ```bash
-# Clone the repository
+# 1. Clone repository
 git clone https://github.com/davCreate/RatingX.git
 cd RatingX
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Run development server with live preview
+# 3. Run development mode (Vite live reload)
 npm run dev
 
-# Run inside Electron
+# 4. Run inside Electron
 npm run electron:start
 
-# Compile Windows .exe installer and portable executable
+# 5. Compile Windows .exe installer and portable executable
 npm run package:win
 ```
-
-Output binaries will be generated inside the `release/` directory.
-
----
-
-## ⚙️ Tech Stack
-
-- **Desktop Shell**: [Electron 33](https://www.electronjs.org/)
-- **UI Framework**: [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Build Tool**: [Vite 5](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS 3](https://tailwindcss.com/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **State & Storage**: [Zustand](https://github.com/pmndrs/zustand) (Local-first persistence)
-- **Packaging**: [electron-builder](https://www.electron.build/)
-
----
-
-## 🤝 Contributing & Feedback
-
-Suggestions and bug reports are welcome! Open an issue or submit a pull request on [GitHub Issues](https://github.com/davCreate/RatingX/issues).
 
 ---
 
 ## 📄 License
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.
 
-Developed with ❤️ by [davCreate](https://github.com/davCreate).
+Maintained with ❤️ by [davCreate](https://github.com/davCreate).

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="50%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+    <linearGradient id="star" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background rounded squircle -->
+  <rect width="512" height="512" rx="128" fill="#0C0C14" />
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="url(#bg)" stroke-width="6" opacity="0.4" />
+
+  <!-- Inner ambient glow -->
+  <circle cx="256" cy="256" r="140" fill="url(#bg)" opacity="0.25" filter="url(#glow)" />
+
+  <!-- Center 'X' geometric symbol -->
+  <path d="M150 140 L256 256 L150 372 M362 140 L256 256 L362 372" fill="none" stroke="url(#bg)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Shining Gold Star in Center -->
+  <polygon points="256,190 273,235 322,238 284,269 296,317 256,289 216,317 228,269 190,238 239,235" fill="url(#star)" filter="url(#glow)" />
+</svg>

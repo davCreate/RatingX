@@ -1,9 +1,12 @@
 export type MediaType = 'movie' | 'tv' | 'anime';
 
+export type WatchStatus = 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch';
+
 export interface Section {
   id: string;
   name: string;
   icon: string;
+  color?: string;
   order: number;
   createdAt: number;
 }
@@ -18,11 +21,19 @@ export interface LibraryItem {
   year: string;
   overview: string;
   sectionId: string;
-  rating: number | null; // 0 to 10
+  rating: number | null; // 0.0 to 10.0
   note: string;
+  tags?: string[];
+  watchStatus?: WatchStatus;
+  favorite?: boolean;
+  trailerUrl?: string | null;
+  genres?: string[];
+  director?: string;
+  cast?: string[];
+  duration?: string;
+  episodes?: number;
   addedAt: number;
   ratedAt: number | null;
-  genres?: string[];
 }
 
 export interface UserProfile {
@@ -30,6 +41,12 @@ export interface UserProfile {
   bio: string;
   avatarUrl: string;
   bannerUrl?: string;
+  favoriteQuote?: string;
+  socialLinks?: {
+    twitter?: string;
+    discord?: string;
+    myanimelist?: string;
+  };
   createdAt: number;
 }
 
@@ -43,4 +60,7 @@ export interface SearchResult {
   overview: string;
   voteAverage?: number;
   genres?: string[];
+  trailerUrl?: string | null;
+  duration?: string;
+  episodes?: number;
 }

@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Edit3, Check, Download, Sparkles } from 'lucide-react';
+import { Edit3, Check, Download, Sparkles, Film, Tv, Heart, Clock } from 'lucide-react';
 import { useAppStore } from '../store';
 import { PosterCard } from '../components/PosterCard';
+import { RatingChart } from '../components/RatingChart';
 import { TitleDetailModal } from '../components/TitleDetailModal';
 import { LibraryItem } from '../types';
 import { useToast } from '../components/Toast';
 
 export const Profile: React.FC = () => {
-  const { profile, updateProfile, library, sections } = useAppStore();
+  const { profile, updateProfile, library, sections, toggleFavorite } = useAppStore();
   const { showToast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -16,6 +17,7 @@ export const Profile: React.FC = () => {
   const [bio, setBio] = useState(profile.bio);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
   const [bannerUrl, setBannerUrl] = useState(profile.bannerUrl || '');
+  const [favoriteQuote, setFavoriteQuote] = useState(profile.favoriteQuote || '');
 
   const [activeItem, setActiveItem] = useState<LibraryItem | null>(null);
 
@@ -24,6 +26,10 @@ export const Profile: React.FC = () => {
     .sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
   const topRated = ratedItems.slice(0, 5);
+
+  const moviesCount = library.filter((i) => i.mediaType === 'movie').length;
+  const tvCount = library.filter((i) => i.mediaType === 'tv').length;
+  const animeCount = library.filter((i) => i.mediaType === 'anime').length;
 
   const avgScore =
     ratedItems.length > 0
@@ -37,6 +43,7 @@ export const Profile: React.FC = () => {
       bio: bio.trim(),
       avatarUrl: avatarUrl.trim() || profile.avatarUrl,
       bannerUrl: bannerUrl.trim() || profile.bannerUrl,
+      favoriteQuote: favoriteQuote.trim(),
     });
     setIsEditing(false);
     showToast('Profile updated successfully!');
@@ -50,40 +57,62 @@ export const Profile: React.FC = () => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${profile.username}'s Watch Catalog & Ratings — RatingX</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-  <style>body { font-family: 'Inter', sans-serif; background-color: #0A0A0F; color: #fff; }</style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #0A0A0F; color: #FFFFFF; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 9999px; }
+  </style>
 </head>
-<body class="p-6 md:p-12 max-w-6xl mx-auto">
-  <div class="relative rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 p-8 shadow-2xl mb-12">
-    <div class="flex flex-col md:flex-row items-center gap-6">
-      <img src="${profile.avatarUrl}" class="w-28 h-28 rounded-full object-cover border-4 border-purple-500 shadow-xl" />
-      <div class="text-center md:text-left">
-        <h1 class="text-3xl font-extrabold">@${profile.username}</h1>
-        <p class="text-zinc-400 text-sm mt-2 max-w-xl">${profile.bio || 'Cinema & Anime Catalog'}</p>
-        <div class="flex items-center justify-center md:justify-start gap-4 mt-4 text-xs font-semibold">
-          <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">${library.length} Titles</span>
-          <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">★ Avg ${avgScore}/10</span>
+<body class="p-6 md:p-12 max-w-6xl mx-auto min-h-screen">
+  <!-- Profile Hero Header -->
+  <div class="relative rounded-3xl overflow-hidden bg-zinc-900/90 border border-white/10 shadow-2xl mb-10">
+    <div class="h-44 md:h-56 w-full bg-zinc-950 overflow-hidden relative">
+      <img src="${profile.bannerUrl || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80'}" class="w-full h-full object-cover opacity-50" />
+      <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent"></div>
+    </div>
+    <div class="p-6 md:p-8 pt-0 relative flex flex-col md:flex-row md:items-end justify-between gap-6 -mt-16">
+      <div class="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left">
+        <img src="${profile.avatarUrl}" class="w-28 h-28 md:w-32 md:h-32 rounded-3xl object-cover border-4 border-zinc-900 shadow-2xl shadow-purple-950/60" />
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black">@${profile.username}</h1>
+          <p class="text-zinc-400 text-sm mt-1 max-w-xl leading-relaxed">${profile.bio || 'Cinema & Anime Catalog'}</p>
+          ${profile.favoriteQuote ? `<p class="text-xs text-purple-400 italic mt-2">“${profile.favoriteQuote}”</p>` : ''}
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-4 text-xs font-semibold">
+            <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">${library.length} Titles</span>
+            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">★ Avg ${avgScore}/10</span>
+            <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">❤️ ${library.filter((i) => i.favorite).length} Favs</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">⭐ Rated Titles (${ratedItems.length})</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+  <!-- Rated Catalog Grid -->
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-black flex items-center gap-2">⭐ Rated Catalog (${ratedItems.length})</h2>
+    <span class="text-xs text-zinc-500">Sorted by highest score</span>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
     ${ratedItems
       .map(
         (item) => `
-      <div class="rounded-2xl bg-zinc-900/90 border border-white/10 overflow-hidden flex flex-col justify-between">
+      <div class="rounded-2xl bg-zinc-900 border border-white/5 overflow-hidden flex flex-col justify-between hover:border-purple-500/40 transition-all shadow-lg">
         <div class="relative aspect-[2/3] bg-zinc-950">
-          <img src="${item.posterPath || ''}" class="w-full h-full object-cover" />
-          <div class="absolute top-2 right-2 px-2 py-1 bg-black/80 rounded-xl text-amber-400 font-bold text-xs border border-amber-500/30">
+          <img src="${item.posterPath || ''}" class="w-full h-full object-cover" loading="lazy" />
+          <div class="absolute top-2 right-2 px-2.5 py-1 bg-black/80 backdrop-blur-md rounded-xl text-amber-400 font-extrabold text-xs border border-amber-500/30">
             ★ ${item.rating !== null ? item.rating.toFixed(1) : '—'}/10
+          </div>
+          <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/70 backdrop-blur-md rounded-full text-zinc-300 text-[10px] uppercase font-bold tracking-wider">
+            ${item.mediaType}
           </div>
         </div>
         <div class="p-3">
-          <h3 class="font-bold text-sm truncate">${item.title}</h3>
-          <p class="text-xs text-zinc-400">${item.year} • ${item.mediaType.toUpperCase()}</p>
-          ${item.note ? `<p class="mt-2 text-xs italic text-zinc-300 bg-black/40 p-2 rounded-lg">"${item.note}"</p>` : ''}
+          <h3 class="font-bold text-sm truncate text-zinc-100">${item.title}</h3>
+          <p class="text-xs text-zinc-400 mt-0.5">${item.year}</p>
+          ${item.tags && item.tags.length > 0 ? `<div class="flex flex-wrap gap-1 mt-1.5">${item.tags.map((t: string) => `<span class="px-1.5 py-0.5 bg-white/5 rounded text-[9px] text-zinc-400">#${t}</span>`).join('')}</div>` : ''}
+          ${item.note ? `<p class="mt-2 text-[11px] italic text-zinc-300 bg-black/50 p-2 rounded-lg border border-white/5">"${item.note}"</p>` : ''}
         </div>
       </div>
     `
@@ -91,8 +120,9 @@ export const Profile: React.FC = () => {
       .join('')}
   </div>
 
-  <footer class="mt-16 text-center text-xs text-zinc-500">
-    Generated with <a href="https://github.com/davCreate/RatingX" class="text-purple-400 underline">RatingX</a> — Discover, Organize & Rate What You Watch
+  <footer class="mt-20 pt-8 border-t border-white/10 text-center text-xs text-zinc-500 space-y-1">
+    <p>Curated with <a href="https://github.com/davCreate/RatingX" class="text-purple-400 font-semibold underline">RatingX</a> — Discover, Organize & Rate Cinema and Anime.</p>
+    <p>© ${new Date().getFullYear()} @${profile.username}</p>
   </footer>
 </body>
 </html>`;
@@ -101,10 +131,10 @@ export const Profile: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${profile.username}-ratingx-profile.html`;
+    a.download = `${profile.username}-ratingx-catalog.html`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('Profile exported as HTML file!');
+    showToast('Exported interactive HTML portfolio!');
   };
 
   return (
@@ -131,7 +161,7 @@ export const Profile: React.FC = () => {
               alt={profile.username}
               className="w-28 h-28 md:w-32 md:h-32 rounded-3xl object-cover border-4 border-zinc-900 shadow-2xl shadow-purple-950"
             />
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <h1 className="text-2xl md:text-3xl font-black text-white">@{profile.username}</h1>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -139,8 +169,13 @@ export const Profile: React.FC = () => {
                 </span>
               </div>
               <p className="text-sm text-zinc-300 max-w-xl leading-relaxed">
-                {profile.bio || 'No bio provided yet.'}
+                {profile.bio || 'Cinema & Anime Catalog'}
               </p>
+              {profile.favoriteQuote && (
+                <p className="text-xs text-purple-400 italic font-medium">
+                  “{profile.favoriteQuote}”
+                </p>
+              )}
             </div>
           </div>
 
@@ -161,7 +196,7 @@ export const Profile: React.FC = () => {
               title="Export a standalone HTML webpage you can share with friends"
             >
               <Download className="w-3.5 h-3.5" />
-              Share / Export HTML
+              Export HTML Portfolio
             </button>
           </div>
         </div>
@@ -194,6 +229,17 @@ export const Profile: React.FC = () => {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-zinc-400 block mb-1">Favorite Film / Anime Quote</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 'To infinity and beyond'..."
+                  value={favoriteQuote}
+                  onChange={(e) => setFavoriteQuote(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-zinc-900 border border-white/10 text-sm text-white focus:outline-none focus:border-purple-500"
                 />
               </div>
 
@@ -230,6 +276,50 @@ export const Profile: React.FC = () => {
         )}
       </div>
 
+      {/* Stats Breakdown & Rating Distribution Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Category Breakdown */}
+        <div className="p-6 rounded-3xl bg-zinc-900/80 border border-white/5 shadow-xl space-y-4 flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-sm text-zinc-100 uppercase tracking-wider mb-4">
+              Catalog Composition
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/60 border border-white/5">
+                <span className="flex items-center gap-2 text-xs font-medium text-cyan-300">
+                  <Film className="w-4 h-4" /> Movies
+                </span>
+                <span className="font-mono text-sm font-bold text-white">{moviesCount}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/60 border border-white/5">
+                <span className="flex items-center gap-2 text-xs font-medium text-purple-300">
+                  <Tv className="w-4 h-4" /> TV Series
+                </span>
+                <span className="font-mono text-sm font-bold text-white">{tvCount}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/60 border border-white/5">
+                <span className="flex items-center gap-2 text-xs font-medium text-pink-300">
+                  <Sparkles className="w-4 h-4" /> Anime
+                </span>
+                <span className="font-mono text-sm font-bold text-white">{animeCount}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3 bg-purple-950/20 border border-purple-500/20 rounded-xl text-xs text-purple-300 flex items-center gap-2">
+            <Heart className="w-4 h-4 shrink-0 text-red-400 fill-red-400" />
+            <span>{library.filter((i) => i.favorite).length} titles pinned to your Hall of Fame</span>
+          </div>
+        </div>
+
+        {/* Rating Distribution Graph */}
+        <div className="lg:col-span-2">
+          <RatingChart items={library} />
+        </div>
+      </div>
+
       {/* Top 5 Hall of Fame */}
       {topRated.length > 0 && (
         <section className="space-y-4">
@@ -246,6 +336,7 @@ export const Profile: React.FC = () => {
                 key={item.id}
                 item={item}
                 onClick={() => setActiveItem(item)}
+                onToggleFavorite={() => toggleFavorite(item.id)}
                 sectionName={sections.find((s) => s.id === item.sectionId)?.name}
                 isLibrary
               />

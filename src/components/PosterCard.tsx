@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, Film, Tv, Sparkles, Plus } from 'lucide-react';
+import { Star, Film, Tv, Sparkles, Plus, Heart } from 'lucide-react';
 import { LibraryItem, SearchResult, MediaType } from '../types';
 
 interface PosterCardProps {
   item: LibraryItem | SearchResult;
   onClick: () => void;
   onQuickAdd?: () => void;
-  onRemove?: () => void;
+  onToggleFavorite?: () => void;
   rating?: number | null;
   sectionName?: string;
   isLibrary?: boolean;
@@ -23,10 +23,13 @@ export const PosterCard: React.FC<PosterCardProps> = ({
   item,
   onClick,
   onQuickAdd,
+  onToggleFavorite,
   rating,
   sectionName,
 }) => {
   const displayRating = 'rating' in item ? item.rating : rating;
+  const isFavorite = 'favorite' in item ? item.favorite : false;
+  const genres = item.genres || [];
 
   return (
     <motion.div
@@ -74,6 +77,25 @@ export const PosterCard: React.FC<PosterCardProps> = ({
           )}
         </div>
 
+        {/* Favorite Heart Button if in library */}
+        {onToggleFavorite && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite();
+            }}
+            className={`absolute bottom-3 left-3 p-2 rounded-xl backdrop-blur-md border border-white/10 transition-all z-20 cursor-pointer ${
+              isFavorite
+                ? 'bg-red-500/80 text-white shadow-lg shadow-red-500/30'
+                : 'bg-black/60 text-zinc-400 hover:text-white opacity-0 group-hover:opacity-100'
+            }`}
+            title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-white' : ''}`} />
+          </button>
+        )}
+
         {/* Quick Actions Overlay Button for non-library items */}
         {onQuickAdd && (
           <button
@@ -82,7 +104,7 @@ export const PosterCard: React.FC<PosterCardProps> = ({
               e.stopPropagation();
               onQuickAdd();
             }}
-            className="absolute bottom-3 right-3 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-xl shadow-purple-600/40 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-20 flex items-center gap-1"
+            className="absolute bottom-3 right-3 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-xl shadow-purple-600/40 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-20 flex items-center gap-1 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add</span>
@@ -101,11 +123,25 @@ export const PosterCard: React.FC<PosterCardProps> = ({
             {sectionName && (
               <>
                 <span>•</span>
-                <span className="text-purple-400 truncate max-w-[100px]">{sectionName}</span>
+                <span className="text-purple-400 truncate max-w-[90px]">{sectionName}</span>
               </>
             )}
           </div>
         </div>
+
+        {/* Genre Tags snippet */}
+        {genres.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {genres.slice(0, 2).map((g) => (
+              <span
+                key={g}
+                className="px-1.5 py-0.5 rounded-md bg-white/5 border border-white/5 text-[9px] text-zinc-400 font-medium"
+              >
+                {g}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Note snippet if present */}
         {'note' in item && item.note && (
