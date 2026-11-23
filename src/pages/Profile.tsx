@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Edit3, Check, Star, Share2, Download, Eye, Sparkles, Film, Tv } from 'lucide-react';
+import { Edit3, Check, Download, Sparkles } from 'lucide-react';
 import { useAppStore } from '../store';
 import { PosterCard } from '../components/PosterCard';
 import { TitleDetailModal } from '../components/TitleDetailModal';
@@ -54,7 +54,6 @@ export const Profile: React.FC = () => {
   <style>body { font-family: 'Inter', sans-serif; background-color: #0A0A0F; color: #fff; }</style>
 </head>
 <body class="p-6 md:p-12 max-w-6xl mx-auto">
-  <!-- Profile Header -->
   <div class="relative rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 p-8 shadow-2xl mb-12">
     <div class="flex flex-col md:flex-row items-center gap-6">
       <img src="${profile.avatarUrl}" class="w-28 h-28 rounded-full object-cover border-4 border-purple-500 shadow-xl" />
@@ -69,7 +68,6 @@ export const Profile: React.FC = () => {
     </div>
   </div>
 
-  <!-- Rated Catalog Grid -->
   <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">⭐ Rated Titles (${ratedItems.length})</h2>
   <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
     ${ratedItems
@@ -119,10 +117,10 @@ export const Profile: React.FC = () => {
             <img
               src={profile.bannerUrl}
               alt="Profile banner"
-              className="w-full h-full object-cover opacity-50"
+              className="w-full h-full object-cover opacity-50 pointer-events-none"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent pointer-events-none" />
         </div>
 
         {/* Content details */}
@@ -149,15 +147,17 @@ export const Profile: React.FC = () => {
           {/* Action buttons */}
           <div className="flex items-center justify-center md:justify-end gap-2.5">
             <button
+              type="button"
               onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2.5 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold border border-white/10 transition-colors flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Edit3 className="w-3.5 h-3.5" />
               {isEditing ? 'Cancel Editing' : 'Edit Profile'}
             </button>
             <button
+              type="button"
               onClick={handleExportHtml}
-              className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5 cursor-pointer"
               title="Export a standalone HTML webpage you can share with friends"
             >
               <Download className="w-3.5 h-3.5" />
@@ -220,7 +220,7 @@ export const Profile: React.FC = () => {
 
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5"
+                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Check className="w-4 h-4" />
                 Save Profile

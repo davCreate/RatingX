@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, FolderPlus, Check } from 'lucide-react';
 import { useAppStore } from '../store';
@@ -26,11 +26,27 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
   const [newSectionName, setNewSectionName] = useState('');
   const [newSectionIcon, setNewSectionIcon] = useState('📁');
 
+  useEffect(() => {
+    if (item) {
+      const existing = library.find(
+        (i) => String(i.externalId) === String('externalId' in item ? item.externalId : item.id)
+      );
+      setSelectedSecId(existing?.sectionId || sections[0]?.id || '');
+      setRating(existing?.rating ?? null);
+      setNote(existing?.note || '');
+      setIsCreatingSection(false);
+      setNewSectionName('');
+    }
+  }, [item, library, sections]);
+
   if (!isOpen || !item) return null;
 
-  const existingInLib = library.find((i) => i.externalId === (('externalId' in item) ? item.externalId : item.id));
+  const existingInLib = library.find(
+    (i) => String(i.externalId) === String('externalId' in item ? item.externalId : item.id)
+  );
 
-  const handleSave = () => {
+  const handleSave = (e?: React.FormEvent) => {
+    e?.preventDefault();
     let targetSectionId = selectedSecId;
 
     if (isCreatingSection && newSectionName.trim()) {
@@ -51,7 +67,7 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
       note: note,
     });
 
-    onSuccess?.(`Added "${item.title}" to your library!`);
+    onSuccess?.(`Saved "${item.title}" to collection!`);
     onClose();
   };
 
@@ -59,7 +75,10 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+        onClick={onClose}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -75,8 +94,9 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
               {existingInLib ? 'Edit in Library' : 'Add to Collection'}
             </h2>
             <button
+              type="button"
               onClick={onClose}
-              className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -88,7 +108,7 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
               <img
                 src={item.posterPath}
                 alt={item.title}
-                className="w-12 h-16 object-cover rounded-lg"
+                className="w-12 h-16 object-cover rounded-lg pointer-events-none"
               />
             ) : (
               <div className="w-12 h-16 rounded-lg bg-purple-900/40 flex items-center justify-center text-xl">
@@ -115,7 +135,7 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
               <button
                 type="button"
                 onClick={() => setIsCreatingSection(!isCreatingSection)}
-                className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 font-medium"
+                className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 font-medium cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 {isCreatingSection ? 'Choose Existing' : 'New Folder'}
@@ -138,7 +158,7 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
                       key={emoji}
                       type="button"
                       onClick={() => setNewSectionIcon(emoji)}
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all cursor-pointer ${
                         newSectionIcon === emoji
                           ? 'bg-purple-600 scale-110 shadow-lg'
                           : 'bg-zinc-800 hover:bg-zinc-700'
@@ -156,7 +176,7 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
                     key={sec.id}
                     type="button"
                     onClick={() => setSelectedSecId(sec.id)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all text-left ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all text-left cursor-pointer ${
                       selectedSecId === sec.id
                         ? 'bg-purple-600 text-white font-medium shadow-md shadow-purple-600/30'
                         : 'bg-zinc-950 hover:bg-zinc-800 text-zinc-300'
@@ -200,14 +220,14 @@ export const AddToSectionModal: React.FC<AddToSectionModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="px-4 py-2 rounded-xl text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="px-5 py-2 rounded-xl text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5"
+              className="px-5 py-2 rounded-xl text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Check className="w-4 h-4" />
               Save Item

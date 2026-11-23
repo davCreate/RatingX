@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Star, Film, Flame, Search as SearchIcon, ArrowRight } from 'lucide-react';
+import { Sparkles, Star, Flame, Search as SearchIcon, ArrowRight } from 'lucide-react';
 import { useAppStore } from '../store';
 import { PosterCard } from '../components/PosterCard';
 import { TitleDetailModal } from '../components/TitleDetailModal';
@@ -12,7 +12,7 @@ import { useToast } from '../components/Toast';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { library, profile, sections } = useAppStore();
+  const { library, sections } = useAppStore();
   const { showToast } = useToast();
 
   const [activeModalItem, setActiveModalItem] = useState<LibraryItem | SearchResult | null>(null);
@@ -35,7 +35,7 @@ export const Home: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.3 }}
         className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-950/70 via-zinc-900 to-indigo-950/60 border border-white/10 p-8 md:p-12 shadow-2xl"
       >
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -53,15 +53,17 @@ export const Home: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
+              type="button"
               onClick={() => navigate('/search')}
-              className="px-6 py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm shadow-xl shadow-purple-600/30 transition-all flex items-center gap-2"
+              className="px-6 py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm shadow-xl shadow-purple-600/30 transition-all flex items-center gap-2 cursor-pointer"
             >
               <SearchIcon className="w-4 h-4" />
               Search Any Title
             </button>
             <button
+              type="button"
               onClick={() => navigate('/library')}
-              className="px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10 font-medium text-sm transition-all flex items-center gap-2"
+              className="px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/10 font-medium text-sm transition-all flex items-center gap-2 cursor-pointer"
             >
               My Collections ({sections.length})
               <ArrowRight className="w-4 h-4" />
@@ -101,7 +103,7 @@ export const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Recently Rated Carousel */}
+      {/* Recently Rated Section */}
       {ratedItems.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -110,8 +112,9 @@ export const Home: React.FC = () => {
               <h2 className="text-xl font-bold text-white tracking-tight">Your Highest & Recent Ratings</h2>
             </div>
             <button
+              type="button"
               onClick={() => navigate('/library')}
-              className="text-xs font-medium text-purple-400 hover:text-purple-300"
+              className="text-xs font-medium text-purple-400 hover:text-purple-300 cursor-pointer"
             >
               View all
             </button>
@@ -139,8 +142,9 @@ export const Home: React.FC = () => {
             <h2 className="text-xl font-bold text-white tracking-tight">Trending & Masterpieces</h2>
           </div>
           <button
+            type="button"
             onClick={() => navigate('/search')}
-            className="text-xs font-medium text-purple-400 hover:text-purple-300"
+            className="text-xs font-medium text-purple-400 hover:text-purple-300 cursor-pointer"
           >
             Explore more
           </button>

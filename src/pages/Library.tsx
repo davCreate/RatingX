@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Folder, Plus, Trash2, Edit2, ArrowUpDown, Filter, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Edit2, ArrowUpDown } from 'lucide-react';
 import { useAppStore } from '../store';
 import { LibraryItem, MediaType } from '../types';
 import { PosterCard } from '../components/PosterCard';
@@ -123,15 +123,17 @@ export const Library: React.FC = () => {
           {activeSection && (
             <>
               <button
+                type="button"
                 onClick={() => handleOpenEditSection(activeSection.id, activeSection.name, activeSection.icon)}
-                className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold border border-white/5 transition-colors flex items-center gap-1.5"
+                className="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold border border-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 Edit Folder
               </button>
               <button
+                type="button"
                 onClick={() => handleDeleteCurrentSection(activeSection.id)}
-                className="p-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 text-xs font-semibold border border-red-500/20 transition-colors"
+                className="p-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-400 text-xs font-semibold border border-red-500/20 transition-colors cursor-pointer"
                 title="Delete Section"
               >
                 <Trash2 className="w-4 h-4" />
@@ -140,8 +142,9 @@ export const Library: React.FC = () => {
           )}
 
           <button
+            type="button"
             onClick={handleOpenCreateSection}
-            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             New Folder
@@ -152,8 +155,9 @@ export const Library: React.FC = () => {
       {/* Sections Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-white/5">
         <button
+          type="button"
           onClick={() => setSearchParams({})}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
             !activeSectionId
               ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -169,8 +173,9 @@ export const Library: React.FC = () => {
           return (
             <button
               key={sec.id}
+              type="button"
               onClick={() => setSearchParams({ section: sec.id })}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                 isSelected
                   ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
                   : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -191,8 +196,9 @@ export const Library: React.FC = () => {
           {(['all', 'movie', 'tv', 'anime'] as const).map((t) => (
             <button
               key={t}
+              type="button"
               onClick={() => setTypeFilter(t)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all cursor-pointer ${
                 typeFilter === t
                   ? 'bg-white/10 text-purple-300 font-semibold'
                   : 'text-zinc-400 hover:text-white'
@@ -209,7 +215,7 @@ export const Library: React.FC = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-1.5 rounded-lg bg-zinc-950 border border-white/10 text-xs text-zinc-300 focus:outline-none focus:border-purple-500"
+            className="px-3 py-1.5 rounded-lg bg-zinc-950 border border-white/10 text-xs text-zinc-300 focus:outline-none focus:border-purple-500 cursor-pointer"
           >
             <option value="rating_desc">Highest Rated (10 → 0)</option>
             <option value="rating_asc">Lowest Rated (0 → 10)</option>
@@ -253,12 +259,16 @@ export const Library: React.FC = () => {
       {/* Create / Edit Section Modal */}
       <AnimatePresence>
         {isEditingSection && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={() => setIsEditingSection(false)}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl p-6 text-zinc-100 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-lg font-bold mb-4">
                 {sectionModalMode === 'create' ? 'Create New Folder' : 'Edit Folder'}
@@ -288,7 +298,7 @@ export const Library: React.FC = () => {
                         key={emoji}
                         type="button"
                         onClick={() => setSecIcon(emoji)}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all cursor-pointer ${
                           secIcon === emoji
                             ? 'bg-purple-600 scale-110 shadow-lg'
                             : 'bg-zinc-800 hover:bg-zinc-700'
@@ -304,13 +314,13 @@ export const Library: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsEditingSection(false)}
-                    className="px-4 py-2 rounded-xl text-sm text-zinc-400 hover:text-white"
+                    className="px-4 py-2 rounded-xl text-sm text-zinc-400 hover:text-white cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30"
+                    className="px-5 py-2 rounded-xl text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30 cursor-pointer"
                   >
                     Save
                   </button>

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Search as SearchIcon, Film, Tv, Sparkles, Loader2, SlidersHorizontal } from 'lucide-react';
 import { searchTitles } from '../services/api';
 import { SearchResult, MediaType } from '../types';
@@ -28,12 +27,12 @@ export const Search: React.FC = () => {
       try {
         const res = await searchTitles(query, filterType, tmdbApiKey);
         if (active) setResults(res);
-      } catch (err) {
+      } catch {
         if (active) setResults([]);
       } finally {
         if (active) setLoading(false);
       }
-    }, 280);
+    }, 250);
 
     return () => {
       active = false;
@@ -56,7 +55,7 @@ export const Search: React.FC = () => {
 
         {/* Input Field */}
         <div className="relative">
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
           <input
             type="text"
             placeholder="Search by title, anime name, movie, characters (e.g. Inception, Naruto, Stranger Things)..."
@@ -66,7 +65,7 @@ export const Search: React.FC = () => {
             autoFocus
           />
           {loading && (
-            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400 animate-spin" />
+            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400 animate-spin pointer-events-none" />
           )}
         </div>
 
@@ -83,8 +82,9 @@ export const Search: React.FC = () => {
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setFilterType(tab.id as 'all' | MediaType)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                   isSelected
                     ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
                     : 'bg-zinc-900 border border-white/5 text-zinc-400 hover:text-white hover:bg-zinc-800'

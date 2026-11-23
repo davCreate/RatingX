@@ -31,7 +31,7 @@ export const Settings: React.FC = () => {
         setUpdateStatus('RatingX v1.0.0 is the latest stable release.');
         showToast('App is up to date (v1.0.0)');
       }
-    } catch (err) {
+    } catch {
       setUpdateStatus('RatingX v1.0.0 is up to date.');
       showToast('Checked GitHub — RatingX is up to date!');
     } finally {
@@ -99,9 +99,10 @@ export const Settings: React.FC = () => {
             </p>
           </div>
           <button
+            type="button"
             onClick={handleCheckUpdates}
             disabled={checkingUpdate}
-            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-semibold text-xs shadow-lg shadow-purple-600/30 transition-all flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-semibold text-xs shadow-lg shadow-purple-600/30 transition-all flex items-center gap-2 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${checkingUpdate ? 'animate-spin' : ''}`} />
             {checkingUpdate ? 'Checking...' : 'Check for Updates'}
@@ -138,7 +139,7 @@ export const Settings: React.FC = () => {
           />
           <button
             type="submit"
-            className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-purple-600/30 transition-all"
+            className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
           >
             Save Key
           </button>
@@ -159,8 +160,9 @@ export const Settings: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <button
+            type="button"
             onClick={handleExportJson}
-            className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-white/10 transition-colors flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-white/10 transition-colors flex items-center gap-2 cursor-pointer"
           >
             <Download className="w-4 h-4 text-purple-400" />
             Export Library JSON
@@ -187,8 +189,9 @@ export const Settings: React.FC = () => {
             </p>
           </div>
           <button
+            type="button"
             onClick={handleReset}
-            className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold shadow-lg shadow-red-600/30 transition-all"
+            className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold shadow-lg shadow-red-600/30 transition-all cursor-pointer"
           >
             Clear All Data
           </button>

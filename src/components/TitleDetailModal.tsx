@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Folder, Calendar, Star, Film, Tv, Sparkles, Share2 } from 'lucide-react';
+import { X, Trash2, Folder, Calendar, Star, Share2 } from 'lucide-react';
 import { LibraryItem, SearchResult } from '../types';
 import { useAppStore } from '../store';
 import { RatingWidget } from './RatingWidget';
@@ -22,22 +22,35 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
 }) => {
   const { library, sections, updateRating, moveItemSection, removeFromLibrary } = useAppStore();
 
-  if (!isOpen || !item) return null;
+  const [currentRating, setCurrentRating] = useState<number | null>(null);
+  const [currentNote, setCurrentNote] = useState<string>('');
+  const [currentSecId, setCurrentSecId] = useState<string>(sections[0]?.id || '');
 
-  const libraryItem = library.find((i) =>
-    'externalId' in item ? i.externalId === item.externalId : i.externalId === item.id
-  );
-
-  const [currentRating, setCurrentRating] = useState<number | null>(libraryItem?.rating ?? null);
-  const [currentNote, setCurrentNote] = useState<string>(libraryItem?.note ?? '');
-  const [currentSecId, setCurrentSecId] = useState<string>(libraryItem?.sectionId ?? sections[0]?.id);
+  const libraryItem = item
+    ? library.find((i) =>
+        String(i.externalId) === String('externalId' in item ? item.externalId : item.id)
+      )
+    : undefined;
 
   const isSavedInLibrary = Boolean(libraryItem);
+
+  useEffect(() => {
+    if (item) {
+      const match = library.find((i) =>
+        String(i.externalId) === String('externalId' in item ? item.externalId : item.id)
+      );
+      setCurrentRating(match?.rating ?? null);
+      setCurrentNote(match?.note ?? '');
+      setCurrentSecId(match?.sectionId ?? sections[0]?.id ?? '');
+    }
+  }, [item, library, sections]);
+
+  if (!isOpen || !item) return null;
 
   const handleSaveEdits = () => {
     if (libraryItem) {
       updateRating(libraryItem.id, currentRating, currentNote);
-      if (currentSecId !== libraryItem.sectionId) {
+      if (currentSecId && currentSecId !== libraryItem.sectionId) {
         moveItemSection(libraryItem.id, currentSecId);
       }
       onToast?.('Changes saved!');
@@ -62,12 +75,16 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl overflow-y-auto">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl overflow-y-auto"
+        onClick={onClose}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-2xl bg-zinc-900/90 border border-white/10 rounded-3xl overflow-hidden shadow-2xl text-zinc-100 my-8"
+          transition={{ duration: 0.2 }}
+          className="relative w-full max-w-2xl bg-zinc-900/95 border border-white/10 rounded-3xl overflow-hidden shadow-2xl text-zinc-100 my-8"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Backdrop Header */}
@@ -76,30 +93,33 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
               <img
                 src={item.backdropPath || item.posterPath || ''}
                 alt={item.title}
-                className="w-full h-full object-cover opacity-40 blur-xs scale-105"
+                className="w-full h-full object-cover opacity-40 blur-xs scale-105 pointer-events-none"
               />
             ) : null}
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/60 to-transparent pointer-events-none" />
 
             {/* Close button */}
             <button
+              type="button"
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-full bg-black/60 hover:bg-black text-zinc-400 hover:text-white transition-all backdrop-blur-md"
+              className="absolute top-4 right-4 p-2 rounded-full bg-black/60 hover:bg-black text-zinc-400 hover:text-white transition-all backdrop-blur-md z-10"
+              title="Close"
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Share button */}
             <button
+              type="button"
               onClick={handleShare}
-              className="absolute top-4 right-16 p-2 rounded-full bg-black/60 hover:bg-black text-zinc-400 hover:text-white transition-all backdrop-blur-md"
+              className="absolute top-4 right-16 p-2 rounded-full bg-black/60 hover:bg-black text-zinc-400 hover:text-white transition-all backdrop-blur-md z-10"
               title="Share"
             >
               <Share2 className="w-5 h-5" />
             </button>
 
             {/* Title overlay */}
-            <div className="absolute bottom-4 left-6 right-6 flex items-end gap-4">
+            <div className="absolute bottom-4 left-6 right-6 flex items-end gap-4 pointer-events-none">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/30 text-purple-300 border border-purple-500/40 uppercase tracking-wider">
@@ -161,7 +181,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
                   <select
                     value={currentSecId}
                     onChange={(e) => setCurrentSecId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-200 focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-white/10 text-sm text-zinc-200 focus:outline-none focus:border-purple-500 cursor-pointer"
                   >
                     {sections.map((sec) => (
                       <option key={sec.id} value={sec.id}>
@@ -199,7 +219,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
                     onClose();
                     onOpenAddModal?.();
                   }}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-lg shadow-purple-600/30 transition-all whitespace-nowrap"
+                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-lg shadow-purple-600/30 transition-all whitespace-nowrap cursor-pointer"
                 >
                   + Add to List
                 </button>
@@ -212,7 +232,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
                 <button
                   type="button"
                   onClick={handleDelete}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                   Remove
@@ -225,7 +245,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-sm text-zinc-400 hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-xl text-sm text-zinc-400 hover:text-white transition-colors cursor-pointer"
                 >
                   Close
                 </button>
@@ -233,7 +253,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
                   <button
                     type="button"
                     onClick={handleSaveEdits}
-                    className="px-6 py-2 rounded-xl text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30 transition-all"
+                    className="px-6 py-2 rounded-xl text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
                   >
                     Save Changes
                   </button>
