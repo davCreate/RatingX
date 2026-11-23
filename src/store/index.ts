@@ -51,8 +51,9 @@ interface AppState {
   moveItemSection: (itemId: string, sectionId: string) => void;
   removeFromLibrary: (itemId: string) => void;
 
-  // Profile
+  // Profile Customization
   updateProfile: (profile: Partial<UserProfile>) => void;
+  togglePinnedFavorite: (externalId: string) => void;
 
   // Backup / Restore
   exportData: () => string;
@@ -69,11 +70,24 @@ const DEFAULT_SECTIONS: Section[] = [
 ];
 
 const DEFAULT_PROFILE: UserProfile = {
-  username: 'Cinephile',
-  bio: 'Rating everything from classic cinema to seasonal anime. Tracking every story that leaves a mark.',
+  displayName: 'Alex Mercer',
+  username: 'CinephileX',
+  bio: 'Rating everything from golden age cinema to seasonal anime. Tracking every story that leaves a mark on the soul.',
+  location: 'Tokyo / Worldwide',
+  pronouns: 'they/them',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+  avatarFrame: 'neon-purple',
   bannerUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80',
+  bannerType: 'image',
+  accentColor: '#8B5CF6',
   favoriteQuote: '“No amount of money ever bought a second of time.” — Tony Stark',
+  pinnedFavorites: ['tmdb-157336', 'anime-16498', 'tmdb-1396', 'anime-5114'],
+  socialLinks: {
+    twitter: 'https://x.com',
+    discord: 'Cinephile#0001',
+    letterboxd: 'https://letterboxd.com',
+    mal: 'https://myanimelist.net',
+  },
   createdAt: Date.now(),
 };
 
@@ -190,7 +204,7 @@ export const useAppStore = create<AppState>()(
       sections: DEFAULT_SECTIONS,
       library: INITIAL_ITEMS,
       profile: DEFAULT_PROFILE,
-      recentSearches: ['Inception', 'Attack on Titan', 'Oppenheimer'],
+      recentSearches: ['Inception', 'Attack on Titan', 'Oppenheimer', 'Breaking Bad'],
       selectedSectionId: null,
 
       setTheme: (theme) => set({ theme }),
@@ -358,10 +372,26 @@ export const useAppStore = create<AppState>()(
         });
       },
 
+      togglePinnedFavorite: (externalId) => {
+        const { pinnedFavorites } = get().profile;
+        let newPinned = [...pinnedFavorites];
+        if (newPinned.includes(externalId)) {
+          newPinned = newPinned.filter((id) => id !== externalId);
+        } else {
+          if (newPinned.length >= 4) {
+            newPinned.shift(); // keep max 4 pinned
+          }
+          newPinned.push(externalId);
+        }
+        set({
+          profile: { ...get().profile, pinnedFavorites: newPinned },
+        });
+      },
+
       exportData: () => {
         const state = get();
         const exportObj = {
-          version: '1.1.0',
+          version: '1.2.0',
           exportedAt: new Date().toISOString(),
           profile: state.profile,
           sections: state.sections,
@@ -378,7 +408,7 @@ export const useAppStore = create<AppState>()(
             set({
               sections: parsed.sections || get().sections,
               library: parsed.library,
-              profile: parsed.profile || get().profile,
+              profile: { ...get().profile, ...(parsed.profile || {}) },
               theme: parsed.theme || get().theme,
             });
             return true;
@@ -398,7 +428,7 @@ export const useAppStore = create<AppState>()(
       },
     }),
     {
-      name: 'ratingx-store-v2',
+      name: 'ratingx-store-v3',
     }
   )
 );

@@ -36,17 +36,29 @@ export interface LibraryItem {
   ratedAt: number | null;
 }
 
+export interface SocialLinks {
+  twitter?: string;
+  discord?: string;
+  instagram?: string;
+  letterboxd?: string;
+  imdb?: string;
+  mal?: string;
+}
+
 export interface UserProfile {
+  displayName: string;
   username: string;
   bio: string;
+  location?: string;
+  pronouns?: string;
   avatarUrl: string;
-  bannerUrl?: string;
+  avatarFrame?: string; // 'none' | 'gold' | 'neon-purple' | 'emerald' | 'cyberpunk'
+  bannerUrl: string;
+  bannerType?: 'image' | 'gradient';
+  accentColor: string; // Hex color code for user's profile theme
   favoriteQuote?: string;
-  socialLinks?: {
-    twitter?: string;
-    discord?: string;
-    myanimelist?: string;
-  };
+  pinnedFavorites: string[]; // Up to 4 externalId strings pinned to profile top
+  socialLinks: SocialLinks;
   createdAt: number;
 }
 
@@ -63,4 +75,10 @@ export interface SearchResult {
   trailerUrl?: string | null;
   duration?: string;
   episodes?: number;
+}
+
+export interface CatalogGenre {
+  id: string;
+  name: string;
+  icon: string;
 }

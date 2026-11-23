@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, Folder, Calendar, Star, Share2, Play, Heart, Tag, Plus } from 'lucide-react';
+import { X, Trash2, Folder, Calendar, Star, Share2, Play, Heart, Tag, Plus, Pin } from 'lucide-react';
 import { LibraryItem, SearchResult, WatchStatus } from '../types';
 import { useAppStore } from '../store';
 import { RatingWidget } from './RatingWidget';
@@ -21,7 +21,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
   onOpenAddModal,
   onToast,
 }) => {
-  const { library, sections, updateRating, moveItemSection, removeFromLibrary, toggleFavorite, updateWatchStatus, updateItemTags } = useAppStore();
+  const { library, sections, profile, updateRating, moveItemSection, removeFromLibrary, toggleFavorite, togglePinnedFavorite, updateWatchStatus, updateItemTags } = useAppStore();
 
   const [currentRating, setCurrentRating] = useState<number | null>(null);
   const [currentNote, setCurrentNote] = useState<string>('');
@@ -38,6 +38,7 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
     : undefined;
 
   const isSavedInLibrary = Boolean(libraryItem);
+  const isPinned = libraryItem ? (profile.pinnedFavorites || []).includes(String(libraryItem.externalId)) : false;
 
   useEffect(() => {
     if (item) {
@@ -155,6 +156,25 @@ export const TitleDetailModal: React.FC<TitleDetailModalProps> = ({
                   title={libraryItem.favorite ? 'Favorited' : 'Favorite'}
                 >
                   <Heart className={`w-5 h-5 ${libraryItem.favorite ? 'fill-white' : ''}`} />
+                </button>
+              )}
+
+              {/* Pin to Profile Spotlight button if in library */}
+              {libraryItem && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    togglePinnedFavorite(String(libraryItem.externalId));
+                    showToast(isPinned ? 'Unpinned from profile spotlight' : 'Pinned to profile top 4 spotlight!');
+                  }}
+                  className={`absolute top-4 right-40 p-2 rounded-full backdrop-blur-md transition-all z-10 cursor-pointer ${
+                    isPinned
+                      ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/40 font-bold'
+                      : 'bg-black/60 text-zinc-400 hover:text-white'
+                  }`}
+                  title={isPinned ? 'Pinned in Profile Top 4' : 'Pin to Profile Top 4'}
+                >
+                  <Pin className={`w-5 h-5 ${isPinned ? 'fill-black' : ''}`} />
                 </button>
               )}
 

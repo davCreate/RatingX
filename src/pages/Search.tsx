@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Search as SearchIcon, Film, Tv, Sparkles, Loader2, SlidersHorizontal, History, X } from 'lucide-react';
-import { searchTitles } from '../services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search as SearchIcon, Film, Tv, Sparkles, Loader2, SlidersHorizontal, History, X, Globe, ChevronDown } from 'lucide-react';
+import { searchTitles, fetchWorldwideCatalog, CATALOG_GENRES } from '../services/api';
 import { SearchResult, MediaType } from '../types';
 import { PosterCard } from '../components/PosterCard';
 import { TitleDetailModal } from '../components/TitleDetailModal';
@@ -8,34 +8,43 @@ import { AddToSectionModal } from '../components/AddToSectionModal';
 import { useAppStore } from '../store';
 import { useToast } from '../components/Toast';
 
-const GENRE_TAGS = ['Action', 'Sci-Fi', 'Drama', 'Fantasy', 'Thriller', 'Adventure', 'Mystery', 'Romance', 'Comedy'];
-
 export const Search: React.FC = () => {
-  const { tmdbApiKey, recentSearches, addRecentSearch, clearRecentSearches } = useAppStore();
+  const { tmdbApiKey, recentSearches, addRecentSearch, clearRecentSearches, toggleFavorite } = useAppStore();
   const { showToast } = useToast();
 
   const [query, setQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | MediaType>('all');
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [selectedGenre, setSelectedGenre] = useState<string>('all');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   const [activeItem, setActiveItem] = useState<SearchResult | null>(null);
   const [addModalItem, setAddModalItem] = useState<SearchResult | null>(null);
 
+  // Load or search when query, filterType, or genre changes
   useEffect(() => {
     let active = true;
+    setPage(0);
+    setHasMore(true);
+
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const searchQuery = selectedGenre && !query.trim() ? selectedGenre : query;
-        const res = await searchTitles(searchQuery, filterType, tmdbApiKey);
-        if (active) {
-          // If genre is selected and query is also typed, filter by genre
-          if (selectedGenre && query.trim()) {
-            setResults(res.filter((item) => item.genres?.includes(selectedGenre)));
-          } else {
+        if (query.trim()) {
+          const res = await searchTitles(query, filterType, tmdbApiKey);
+          if (active) {
             setResults(res);
+            setHasMore(false);
+          }
+        } else {
+          // Worldwide Stremio catalog browse
+          const res = await fetchWorldwideCatalog(filterType, selectedGenre, 0);
+          if (active) {
+            setResults(res);
+            setHasMore(res.length >= 20);
           }
         }
       } catch {
@@ -43,13 +52,37 @@ export const Search: React.FC = () => {
       } finally {
         if (active) setLoading(false);
       }
-    }, 250);
+    }, 280);
 
     return () => {
       active = false;
       clearTimeout(timer);
     };
   }, [query, filterType, selectedGenre, tmdbApiKey]);
+
+  // Load next page of worldwide catalog
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore || query.trim()) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    try {
+      const more = await fetchWorldwideCatalog(filterType, selectedGenre, nextPage);
+      if (more.length === 0) {
+        setHasMore(false);
+      } else {
+        setResults((prev) => {
+          const seen = new Set(prev.map((i) => i.id));
+          const newUnique = more.filter((i) => !seen.has(i.id));
+          return [...prev, ...newUnique];
+        });
+        setPage(nextPage);
+      }
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,13 +95,18 @@ export const Search: React.FC = () => {
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       {/* Header & Search Bar */}
       <div className="space-y-4">
-        <div>
-          <h1 className="text-3xl font-black text-white tracking-tight">
-            Search Films, Series & Anime
-          </h1>
-          <p className="text-sm text-zinc-400 mt-1">
-            Search across millions of movies, shows, and anime. Add to your custom folders and rate from 0/10.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+              <span>Universal Catalog Explorer</span>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5" /> Stremio + TMDB + Anime
+              </span>
+            </h1>
+            <p className="text-sm text-zinc-400 mt-1">
+              Explore virtually every film, series, and anime in the world. Add to your folders and rate on a 0/10 scale.
+            </p>
+          </div>
         </div>
 
         {/* Input Field */}
@@ -76,7 +114,7 @@ export const Search: React.FC = () => {
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search by title, anime name, movie, directors (e.g. Inception, Naruto, Oppenheimer)..."
+            placeholder="Search any title in the world (e.g. Inception, Breaking Bad, Jujutsu Kaisen, Dune, One Piece)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full pl-12 pr-12 py-3.5 bg-zinc-900/90 border border-white/10 rounded-2xl text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-sm md:text-base transition-all shadow-xl"
@@ -121,13 +159,13 @@ export const Search: React.FC = () => {
           </div>
         )}
 
-        {/* Filter Pills */}
+        {/* Media Type Tabs */}
         <div className="flex flex-wrap items-center gap-2">
           {[
-            { id: 'all', label: 'All Categories', icon: SlidersHorizontal },
+            { id: 'all', label: 'All Catalog', icon: SlidersHorizontal },
             { id: 'movie', label: 'Movies', icon: Film },
-            { id: 'tv', label: 'TV Series', icon: Tv },
-            { id: 'anime', label: 'Anime', icon: Sparkles },
+            { id: 'tv', label: 'TV Shows & Series', icon: Tv },
+            { id: 'anime', label: 'Anime Universe', icon: Sparkles },
           ].map((tab) => {
             const Icon = tab.icon;
             const isSelected = filterType === tab.id;
@@ -147,50 +185,55 @@ export const Search: React.FC = () => {
               </button>
             );
           })}
-
-          <div className="h-4 w-[1px] bg-white/10 hidden sm:block mx-1" />
-
-          {/* Genre Filters */}
-          {GENRE_TAGS.map((genre) => {
-            const isSelected = selectedGenre === genre;
-            return (
-              <button
-                key={genre}
-                type="button"
-                onClick={() => setSelectedGenre(isSelected ? null : genre)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 font-semibold'
-                    : 'bg-zinc-950/60 border border-white/5 text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                {genre}
-              </button>
-            );
-          })}
         </div>
+
+        {/* Genre Badges (When browsing catalog) */}
+        {!query && filterType !== 'anime' && (
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            {CATALOG_GENRES.map((g) => {
+              const isSelected = selectedGenre === g.id;
+              return (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => setSelectedGenre(g.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 font-semibold'
+                      : 'bg-zinc-950/60 border border-white/5 text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  <span>{g.icon}</span>
+                  <span>{g.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Results Grid */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400">
-            {query.trim() || selectedGenre
-              ? `Search Results (${results.length})`
-              : 'Popular Catalog Highlights'}
+          <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+            <span>
+              {query.trim()
+                ? `Search Results for "${query}" (${results.length})`
+                : `${filterType === 'all' ? 'Worldwide Top Titles' : filterType === 'movie' ? 'Top Movies' : filterType === 'tv' ? 'Popular Series' : 'Top Anime'} (${results.length} loaded)`}
+            </span>
           </h2>
         </div>
 
         {results.length === 0 && !loading ? (
-          <div className="py-20 text-center space-y-3 bg-zinc-900/30 rounded-3xl border border-white/5">
+          <div className="py-24 text-center space-y-3 bg-zinc-900/30 rounded-3xl border border-white/5">
             <span className="text-5xl">🔍</span>
             <h3 className="text-lg font-bold text-white">No titles found</h3>
             <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-              Try searching with another spelling, or switch between Movies, TV Series, and Anime tabs.
+              Check spelling or try a broader search across Movies, TV Series, and Anime.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {results.map((item) => (
               <PosterCard
                 key={item.id}
@@ -199,6 +242,30 @@ export const Search: React.FC = () => {
                 onQuickAdd={() => setAddModalItem(item)}
               />
             ))}
+          </div>
+        )}
+
+        {/* Load More Button for Infinite Catalog */}
+        {!query && hasMore && results.length > 0 && (
+          <div className="flex justify-center pt-8">
+            <button
+              type="button"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="px-8 py-3.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-white font-semibold text-xs shadow-xl transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                  <span>Loading titles from Stremio Cinemeta...</span>
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4 text-purple-400" />
+                  <span>Load More Titles</span>
+                </>
+              )}
+            </button>
           </div>
         )}
       </div>
